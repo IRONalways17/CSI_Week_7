@@ -143,8 +143,27 @@ def main():
         available_models.append("Housing Price Prediction")
     
     if not available_models:
-        st.error("⚠️ No trained models found! Please run `python train_models.py` first.")
-        st.info("This will create the necessary model files in the 'models' directory.")
+        st.error("⚠️ No trained models found!")
+        st.info("Training models automatically... This may take a moment.")
+        
+        # Auto-train models for deployment
+        with st.spinner("Training machine learning models..."):
+            try:
+                import subprocess
+                import sys
+                
+                # Run the training script
+                result = subprocess.run([sys.executable, "train_models.py"], 
+                                      capture_output=True, text=True, cwd=".")
+                
+                if result.returncode == 0:
+                    st.success("✅ Models trained successfully! Please refresh the page.")
+                    st.rerun()
+                else:
+                    st.error(f"Training failed: {result.stderr}")
+            except Exception as e:
+                st.error(f"Failed to train models: {str(e)}")
+                st.info("Please run `python train_models.py` manually first.")
         return
     
     selected_model = st.sidebar.selectbox("Choose a model:", available_models)
